@@ -9,21 +9,21 @@ input.txtDownload input.txt
                MASM4 TEXT EDITOR
         Data Structure Heap Memory Consumption: 00000000 bytes
         Number of Nodes: 0
-<1> View all strings
+    <1> View all strings
 
-<2> Add string
-    <a> from Keyboard
-    <b> from File. Static file named input.txt
+    <2> Add string
+      <a> from Keyboard
+      <b> from File. Static file named input.txt
 
-<3> Delete string. Given an index #, delete the entire string and de-allocate memory (including the node).
+    <3> Delete string. Given an index #, delete the entire string and de-allocate memory (including the node).
 
-<4> Edit string. Given an index #, replace old string w/ new string. Allocate/De-allocate as needed.
+    <4> Edit string. Given an index #, replace old string w/ new string. Allocate/De-allocate as needed.
 
-<5> String search. Regardless of case, return all strings that match the substring given.
+    <5> String search. Regardless of case, return all strings that match the substring given.
 
-<6> Save File (output.txt)
+    <6> Save File (output.txt)
 
-<7> Quit
+    <7> Quit
  
 
 Testing: If you read in the input file and then immediately save, the output file should be identical to the input file in every way (i.e. # of bytes).
