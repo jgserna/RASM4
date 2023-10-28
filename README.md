@@ -45,30 +45,49 @@ Test Case #1:
 
 Option <1> View all strings
 Result: [EMPTY]
+
 Option <2><a>
 Input: "Given to you during demo time"
+
 Option <1> View all strings
 [0] Given to you during demo time
+
 Option <7>
 Result: Exit the program
+
+
 Test Case #2:
 
 Option <2><b>
+
 Option <6>
+
 Option <7>
+
 Result: Exit the program
+
 console: diff -s input.txt output.txt
+
 Result: [SAME]
+
 Test Case #3:
 
 Option <2><b>
+
 Option <2><a>
+
 Input: "Segmentation Fault"
+
 Option <1> View all strings
+
 Result: input file + new string from above
+
 Option <5>Search (with_the_intention_of_deleting_one_of_those_lines)
+
 Input a string determined by me during demo time
+
 example: Search: tomorrow
+
 [776] "Tomorrow is Christmas! It's practically here!"
 [779] For Tomorrow, he knew, all the Who girls and boys,
 [964] Ask me tomorrow but not today.
