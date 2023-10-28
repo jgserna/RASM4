@@ -89,23 +89,44 @@ Input a string determined by me during demo time
 example: Search: tomorrow
 
 [776] "Tomorrow is Christmas! It's practically here!"
+
 [779] For Tomorrow, he knew, all the Who girls and boys,
+
 [964] Ask me tomorrow but not today.
+
 [1165] Tomorrow is another one.
+
 Option <3> Delete
+
 Enter the index from above
+
 Option <1> View all strings
+
 Result
+
 Option <5>Search (with_the_intention_of_editing_one_of_those_lines)
+
 Do the edit given to you and run-time (verifying that edit worked)
+
 Option <4> Edit the line given during demo time, then display it.
+
 Extra Credit 10 points: To allow the user to enter the filename for reading and writing.
+
+
 
 Extra Credit 5 points: Modify your search to match Notepad++ (i.e.)
 
+
+
 Extra Credit 10 points: Github ...
 
+
+
 Search "toMorrow" (3 hits in 1 file of 1 searched)
+
     Line 777: "Tomorrow is Christmas! It's practically here!"
+    
     Line 780: For Tomorrow, he knew, all the Who girls and boys,
+    
     Line 1166: Tomorrow is another one.
+
