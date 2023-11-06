@@ -6,7 +6,7 @@
 	.equ	MAX_BYTES, 512
 
 	.data
-szName:		.asciz	"Names:Austin Monroe & Jocelyne Gallardo"
+szName:		.asciz	"Names: Austin Monroe & Jocelyne Gallardo"
 szProg:		.asciz	"Program: RASM4"
 szClass:	.asciz	"Class: CS3B"
 szDate:		.asciz	"Date: November 9, 2023"
