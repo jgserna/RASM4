@@ -3,7 +3,9 @@
 //
 
 //
-	.equ	MAX_BYTES, 512
+.equ RW_RW___, 0660
+.equ AT_FDCWD, -100
+.equ MAX_BYTES, 512 // Max string size
 
 	.data
 szName:		.asciz	"Names: Austin Monroe & Jocelyne Gallardo"
@@ -18,6 +20,9 @@ szGoodbye:	.asciz	"Goodbye.\n"
 szInput:	.skip	21
 strInput:	.skip	512
 chLF:		.byte	0xa
+newNode:  .quad  0
+headPtr:  .quad 0
+tailPtr:  .quad  0
 
 
 	.global _start
@@ -118,7 +123,8 @@ inputValid:
 	
 // functions to make:
 viewAll:
-
+    ldr x0, =headPtr
+    bl viewAllStrings
 	b inputLoop
 	
 addStrFromKeyboard:
@@ -130,14 +136,15 @@ addStrFromKeyboard:
 	bl	getstring
 	
 	ldr	x0,=strInput
-	bl	addFromKBD
+	//bl	addFromKBD
 	
 	b inputLoop
 	
 addStringFromFile:
-
-	//ldr	x0,=fileName
-	//bl	addFromFile
+    ldr x0, =headPtr
+    ldr x1, =tailPtr
+    ldr x2, =newNode 
+	bl	addFromFile
 	
 	b inputLoop
 	
