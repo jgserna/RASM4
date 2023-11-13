@@ -130,6 +130,13 @@ endAddNode:
 	ldr	x5,[x5]
 	add	x5,x5,#1
 	str	x5,[x25]
+	
+	mov	x1,#16
+	mov	x4,x24
+	ldr	x4,[x4]
+	add	x4,x4,x1
+	str	x4,[x24]
+	
 	ret		
 	
 incrementBytes:
