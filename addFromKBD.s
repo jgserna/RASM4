@@ -4,8 +4,8 @@
 //x1 has tailPtr 	saved in x21
 //x2 has newNode 	saved in x22
 //x3 has kbdBuf 	saved in x23
-//x4 has consumption saved in x24 
-//x5 has numNodes 	saved in x25
+//x4 has cons 	saved in x24 
+//x5 has numNodes saved in x25
 //
 //
 
@@ -84,10 +84,13 @@ copyLoop:	//x2 holds the address of string to be copied
 	b	copyLoop	//loop until null (end of string) is found
 
 exitCopyLoop:
+	mov w3,#0xa
+	strb	w3,[x0]		//add a null to the end of string
+	
 	ret
 
 addNode:
-	
+
 //	ldr	x0,=newNode	//load address of newNode
 	mov	x0,x22
 	ldr	x0,[x0]		//load the address held in the address of newNode
@@ -123,23 +126,22 @@ emptyList:
 	b	endAddNode
 	
 endAddNode:
-	ret		
-	
-incrementBytes:
-	mov	x1,x0
-	mov	x4,x24
-	ldr	x4,[x4]
-	add	x4,x4,x1
-	str	x4,[x24]
-	ret
-
-incrementNodes:
 	mov	x5,x25
 	ldr	x5,[x5]
 	add	x5,x5,#1
 	str	x5,[x25]
-
+	ret		
+	
+incrementBytes:
+	mov	x1,x0
+	add	x1,x1,#1
+	mov	x4,x24
+	ldr	x4,[x4]
+	add	x4,x4,x1
+	str	x4,[x24]
+	
 	ret
+
 
 end:
 	mov	x0,x23
@@ -150,4 +152,6 @@ end:
 	
 	.end
 	
+	
+
 	
