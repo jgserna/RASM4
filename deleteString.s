@@ -97,5 +97,5 @@ adjustNumNodes:
 	str x4,[x25]
 	
 	ret 
-	.end
+	
 	
