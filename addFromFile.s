@@ -11,13 +11,20 @@ ptrString: .quad 0
 	.global addFromFile
 	.text
 addFromFile:
+	
+	mov x27,x3	//file name
+	mov x25,x5 // consumption
+	mov x26,x6 //nodes
+
     mov x22, x0
     mov x23, x1
     mov x24, x2
     mov x0, #AT_FDCWD
     mov x8, #56			//OPENAT
-    ldr x1, =szFile
+//  ldr x1, =szFile
+	mov x1,x27
     mov x2, #0
+    mov x3, #RW_RW___
     svc #0
 
     ldr x1, =iFD
@@ -29,7 +36,10 @@ addFromFile:
     str LR, [SP, #-16]!
 jg_readLoop:
 	//x0 = iFD
+    ldr	x0,=iFD		//load the file descriptor
+	ldrb	w0,[x0]		//x0 = iFD
 	ldr	x1,=tempStr
+    
 	bl	jg_getline
 
 	//getline returns ---- in x0
@@ -40,7 +50,6 @@ jg_readLoop:
     bl am_malloc_and_copy
     ldr x0, =ptrString
     ldr x0, [x0]
-    bl putstring
     bl am_add_node_to_list
     b jg_readLoop
 
@@ -54,21 +63,27 @@ jg_closeFile:
 	
 	mov	x8, #57			//CLOSE file
 	svc	0
-	
-    mov x8, #93        // syscall number for exit
-    mov x0, #0         // exit status
-    svc #0
+	LDR	LR,[SP],#16	//POP LR
+    ret
 
 
 //returns x0 with number of bytes that was read. once 0 is returned, end of file.
 
 jg_getchar:
+	STR	LR,[SP,#-16]!		//PUSH LR
+	
 	//x0 contains iFD
 	//x1 contains tempStr
 	mov	x2,#1	//x2 holds how many bytes to read
 	mov	x8,#63		//READ
 	svc	0		//service call
-
+	
+	mov x5,x25
+	ldr x5,[x5]
+	add x5,x5,#1
+	str x5,[x25]		//incrmentbyte each char is read
+	
+	LDR	LR,[SP],#16	//POP LR
 	ret
 	
 
@@ -81,14 +96,15 @@ jg_getline:
 jg_top:
 	// X0 contains iFD
 	// X1 contains tempStr
+    
 	bl	jg_getchar
-						//x1 = tempStr
+		//x1 = tempStr
 	ldrb	w2,[x1]		//load a byte from x1 (tempStr)
 	cmp	w2,#0xa		//is w2 LF(0xa)?
 	beq	jg_endOfLine	//jump to end of line if equal
 
 	cmp	w0,#0x0		//if w0 = 0
-	beq	jg_endOfFile	//jump to endOfFile if equal
+	beq	jg_closeFile	//jump to endOfFile if equal
 	//if neither null or 0 are found, a valid char was read
 
 	add	x1,x1,#1	//increment ptrBuff by 1
@@ -106,7 +122,7 @@ jg_endOfFile:
 	b jg_exitGetline
 
 jg_exitGetline:
-	LDR	x30,[SP],#16	//POP LR
+	LDR	LR,[SP],#16	//POP LR
 
 	ret
 
@@ -118,6 +134,8 @@ am_malloc_and_copy:
     bl String_length
     mov x20, x0        // Store the length of the string
     bl malloc
+	
+	
     // Store the address in ptrString
     ldr x1, =ptrString
     str x0, [x1]
@@ -126,6 +144,12 @@ am_malloc_and_copy:
 
     mov x0, #16  // 16 bytes for the newNode
     bl malloc
+	
+	mov x5,x25
+	ldr x5,[x5]
+	add x5,x5,#16
+	str x5,[x25]		//increment byte count by 16 after malloc for a node
+	
     // Store the address in newNode
     mov x1, x24
     str x0, [x1]
@@ -174,6 +198,12 @@ am_list_empty:
     mov x1, x23
     str x0, [x1]  // Update tailPtr to point to the new node
 am_end_add_node:
+
+	mov x6,x26
+	ldr x6,[x6]
+	add x6,x6,#1
+	str x6,[x26]	//increment node count by 1
+	
     ret
 
 am_copy_string:
