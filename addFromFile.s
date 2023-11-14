@@ -1,50 +1,118 @@
-.equ RW_RW___, 0660
-.equ AT_FDCWD, -100
-.equ MAX_BYTES, 512 // Max string size
+	.equ RW_RW___, 0660
+	.equ AT_FDCWD, -100
+	.equ MAX_BYTES, 512 // Max string size
 
-
-    .data
+	.data
 tempStr: .space MAX_BYTES   // Reserve space for MAX_BYTES bytes
 szFile: .asciz "input.txt"  
 iFD: .word 0
 ptrString: .quad 0
-.global addFromFile
-.text
+
+	.global addFromFile
+	.text
 addFromFile:
     mov x22, x0
     mov x23, x1
     mov x24, x2
     mov x0, #AT_FDCWD
-    mov x8, #56
+    mov x8, #56			//OPENAT
     ldr x1, =szFile
     mov x2, #0
+    mov x3, #RW_RW___
     svc #0
 
     ldr x1, =iFD
     strb w0, [x1]
 
-    ldr x8, =tempStr
+	
+//readFromFile
+	
     str LR, [SP, #-16]!
-am_file_read_loop:
-    ldr x0, =iFD
-    ldrb w0, [x0]
-    mov x8, #63   // syscall number for read
-    ldr x1, =tempStr
-    mov x2, #MAX_BYTES  // Read up to MAX_BYTES bytes
-    svc #0
+jg_readLoop:
+	//x0 = iFD
+    ldr	x0,=iFD		//load the file descriptor
+	ldrb	w0,[x0]		//x0 = iFD
+	ldr	x1,=tempStr
+    
+	bl	jg_getline
 
-    cmp w0, #0   // Check if end of file reached (0 bytes read)
-    beq am_file_read_done
-
+	//getline returns ---- in x0
+	cmp	x0,#0		//compare x0 to 0
+	beq	jg_closeFile		//while keep getting data
+	
     ldr x0, =tempStr
-    bl putstring
-    //bl am_malloc_and_copy
-    //bl am_add_node_to_list
-    b am_file_read_done
+    bl am_malloc_and_copy
+    ldr x0, =ptrString
+    ldr x0, [x0]
+    bl am_add_node_to_list
+    b jg_readLoop
 
-am_file_read_done:
-    ldr LR, [SP], #16
+	ldr	x0,=iFD		//load the file descriptor
+	ldrb	w0,[x0]		//x0 = iFD
+
+jg_closeFile:
+	//x0 needs to be file handle
+	ldr	x0,=iFD
+	ldrb	w0,[x0]
+	
+	mov	x8, #57			//CLOSE file
+	svc	0
+	LDR	LR,[SP],#16	//POP LR
     ret
+
+
+//returns x0 with number of bytes that was read. once 0 is returned, end of file.
+
+jg_getchar:
+	//x0 contains iFD
+	//x1 contains tempStr
+	mov	x2,#1	//x2 holds how many bytes to read
+	mov	x8,#63		//READ
+	svc	0		//service call
+
+	ret
+	
+
+// X0 contains iFD
+// X1 contains tempStr
+
+jg_getline:
+	STR	LR,[SP,#-16]!		//PUSH LR
+	
+jg_top:
+	// X0 contains iFD
+	// X1 contains tempStr
+    
+	bl	jg_getchar
+		//x1 = tempStr
+	ldrb	w2,[x1]		//load a byte from x1 (tempStr)
+	cmp	w2,#0xa		//is w2 LF(0xa)?
+	beq	jg_endOfLine	//jump to end of line if equal
+
+	cmp	w0,#0x0		//if w0 = 0
+	beq	jg_closeFile	//jump to endOfFile if equal
+	//if neither null or 0 are found, a valid char was read
+
+	add	x1,x1,#1	//increment ptrBuff by 1
+	ldr	x0,=iFD		//reload file descriptor
+	ldrb	w0,[x0]
+	b	jg_top		//loop until endOfFile is found
+
+jg_endOfLine:
+	add	x1,x1,#1	//increment the file tempStr by one
+	mov	w2,#0		//Make tempStr into a c-string by storing a null at the end
+	strb	w2,[x1]		//(i.e. "text\0")
+	b	jg_exitGetline
+
+jg_endOfFile:
+	b jg_exitGetline
+
+jg_exitGetline:
+	LDR	LR,[SP],#16	//POP LR
+
+	ret
+
+
 
 am_malloc_and_copy:
     mov x21, x0        // Store the original string address
@@ -116,6 +184,7 @@ am_copy_string:
     add x2, x2, #1
     // Check if the character is null (end of the string)
     cbz w3, am_end_copy // If it's null, exit the loop
+    // Store the character in the allocated memory
     strb w3, [x0]
     add x0, x0, #1
     // Repeat the loop
@@ -124,5 +193,7 @@ am_copy_string:
 am_end_copy:
     ret
 
+endAddFromFile:
+	ret
 
-.end
+	.end
