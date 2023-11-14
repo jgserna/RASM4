@@ -18,6 +18,7 @@ szPrompt:	.asciz	"\nEnter your selection: "
 szPrompt1:	.asciz	"Enter a string: "
 szPrompt2:	.asciz	"Enter a line to delete: "
 szPrompt3:	.asciz	"Enter a line to edit: "
+szPrompt4:	.asciz	"Enter a file name: "
 szStringSearch: .asciz "Enter a string to search: "
 szInvalidMsg:	.asciz	"INVALID ENTRY.\n"
 szGoodbye:	.asciz	"Goodbye.\n"
@@ -198,9 +199,17 @@ addStrFromKeyboard:
 	b displayMenu
 	
 addStringFromFile:
+	ldr	x0,=szPrompt4
+	bl	putstring
+	
+	ldr	x0,=strTemp
+	mov	x1,#MAX_BYTES
+	bl	getstring
+
     ldr x0,=headPtr
     ldr x1,=tailPtr
     ldr x2,=newNode
+	ldr x3,=strTemp
 	ldr x5,=consumption
 	ldr x6,=numNodes
 
