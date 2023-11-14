@@ -11,12 +11,18 @@ ptrString: .quad 0
 	.global addFromFile
 	.text
 addFromFile:
+	
+	mov x27,x3	//file name
+	mov x25,x5 // consumption
+	mov x26,x6 //nodes
+
     mov x22, x0
     mov x23, x1
     mov x24, x2
     mov x0, #AT_FDCWD
     mov x8, #56			//OPENAT
-    ldr x1, =szFile
+//  ldr x1, =szFile
+	mov x1,x27
     mov x2, #0
     mov x3, #RW_RW___
     svc #0
@@ -35,16 +41,16 @@ jg_readLoop:
 	ldr	x1,=tempStr
     
 	bl	jg_getline
-
+    
 	//getline returns ---- in x0
-	cmp	x0,#0		//compare x0 to 0
+    cmp	x0,#0		//compare x0 to 0
 	beq	jg_closeFile		//while keep getting data
-	
     ldr x0, =tempStr
     bl am_malloc_and_copy
     ldr x0, =ptrString
     ldr x0, [x0]
     bl am_add_node_to_list
+
     b jg_readLoop
 
 	ldr	x0,=iFD		//load the file descriptor
@@ -64,12 +70,20 @@ jg_closeFile:
 //returns x0 with number of bytes that was read. once 0 is returned, end of file.
 
 jg_getchar:
+	STR	LR,[SP,#-16]!		//PUSH LR
+	
 	//x0 contains iFD
 	//x1 contains tempStr
 	mov	x2,#1	//x2 holds how many bytes to read
 	mov	x8,#63		//READ
 	svc	0		//service call
-
+	
+	mov x5,x25
+	ldr x5,[x5]
+	add x5,x5,#1
+	str x5,[x25]		//incrmentbyte each char is read
+	
+	LDR	LR,[SP],#16	//POP LR
 	ret
 	
 
@@ -108,6 +122,7 @@ jg_endOfFile:
 	b jg_exitGetline
 
 jg_exitGetline:
+
 	LDR	LR,[SP],#16	//POP LR
 
 	ret
@@ -119,7 +134,10 @@ am_malloc_and_copy:
     str LR, [SP, #-16]!
     bl String_length
     mov x20, x0        // Store the length of the string
+    add x0,x0,#1
     bl malloc
+	
+	
     // Store the address in ptrString
     ldr x1, =ptrString
     str x0, [x1]
@@ -128,6 +146,12 @@ am_malloc_and_copy:
 
     mov x0, #16  // 16 bytes for the newNode
     bl malloc
+	
+	mov x5,x25
+	ldr x5,[x5]
+	add x5,x5,#16
+	str x5,[x25]		//increment byte count by 16 after malloc for a node
+	
     // Store the address in newNode
     mov x1, x24
     str x0, [x1]
@@ -176,6 +200,12 @@ am_list_empty:
     mov x1, x23
     str x0, [x1]  // Update tailPtr to point to the new node
 am_end_add_node:
+
+	mov x6,x26
+	ldr x6,[x6]
+	add x6,x6,#1
+	str x6,[x26]	//increment node count by 1
+	
     ret
 
 am_copy_string:

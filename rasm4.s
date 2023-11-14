@@ -11,14 +11,17 @@ szName:		.asciz	"Names: Austin Monroe & Jocelyne Gallardo"
 szProg:		.asciz	"Program: RASM4"
 szClass:	.asciz	"Class: CS3B"
 szDate:		.asciz	"Date: November 9, 2023"
-szConsump:	.asciz	"Data Structure Heap Memory Consumption: "
+szConsump:	.asciz	"\nData Structure Heap Memory Consumption: "
 szNodes:	.asciz	"Number of Nodes: "
 szMenu:		.asciz	"<1> View all strings\n\n<2> Add String\n\t<a> from Keyboard\n\t<b> from File\n\n<3> Delete String\n\n<4> Edit String\n\n<5> String Search\n\n<6> Save File\n\n<7> Quit\n\n" 
 szPrompt:	.asciz	"\nEnter your selection: "
 szPrompt1:	.asciz	"Enter a string: "
 szPrompt2:	.asciz	"Enter a line to delete: "
+szPrompt3:	.asciz	"Enter a line to edit: "
+szPrompt4:	.asciz	"Enter a file name : "
+szPrompt5:	.asciz	"Enter a file name to save: "
 szStringSearch: .asciz "Enter a string to search: "
-szInvalidMsg:	.asciz	"Invalid entry."
+szInvalidMsg:	.asciz	"INVALID ENTRY.\n"
 szGoodbye:	.asciz	"Goodbye.\n"
 szInput:	.skip	21
 strTemp:	.skip	512
@@ -142,7 +145,7 @@ invalidInput:
 	ldr	x0,=szInvalidMsg
 	bl	putstring
 	
-	b	inputLoop
+	b	displayMenu
 	
 inputValid:
 
@@ -175,7 +178,7 @@ inputValid:
 viewAll:
     ldr x0, =headPtr
     bl viewAllStrings
-	b inputLoop
+	b displayMenu
 	
 addStrFromKeyboard:
 	ldr	x0,=szPrompt1
@@ -194,33 +197,77 @@ addStrFromKeyboard:
 
 	bl	addFromKBD
 	
-	b inputLoop
+	b displayMenu
 	
 addStringFromFile:
-    ldr x0, =headPtr
-    ldr x1, =tailPtr
-    ldr x2, =newNode
-	ldr x4,=consumption
-	ldr x5,=numNodes
+	ldr	x0,=szPrompt4
+	bl	putstring
+	
+	ldr	x0,=strTemp
+	mov	x1,#MAX_BYTES
+	bl	getstring
+
+    ldr x0,=headPtr
+    ldr x1,=tailPtr
+    ldr x2,=newNode
+	ldr x3,=strTemp
+	ldr x5,=consumption
+	ldr x6,=numNodes
 
 	bl	addFromFile
 	
-	b inputLoop
+	b displayMenu
 	
 	
 deleteStr:
 	ldr	x0,=szPrompt2
 	bl	putstring
 	
-	ldr	x0,=strTemp
+	ldr	x0,=index
 	mov	x1,#MAX_BYTES
 	bl	getstring
-		//prompt user for index?
-	//use index in function to delete String
-	//b inputLoop
+	
+	ldr x0,=index
+	bl ascint64
+	mov x1,x0
+	ldr x0,=index
+	str x1,[x0]
+	
+	ldr x0,=headPtr
+   	ldr x1,=tailPtr
+   	ldr x2,=newNode
+	ldr x3,=index
+	ldr x4,=consumption
+	ldr x5,=numNodes
+
+	
+	bl	deleteString
+	
+	b displayMenu
 
 editStr:
-	//
+	ldr	x0,=szPrompt3
+	bl	putstring
+	
+	ldr	x0,=index
+	mov	x1,#MAX_BYTES
+	bl	getstring
+	
+	ldr x0,=index
+	bl ascint64
+	mov x1,x0
+	ldr x0,=index
+	str x1,[x0] 
+	
+	ldr x0,=headPtr
+   	ldr x1,=tailPtr
+   	ldr x2,=newNode
+	ldr x3,=index
+	ldr x4,=consumption
+	
+	bl editString
+	
+	b displayMenu
 
 searchStr:
 	ldr x0, =szStringSearch
@@ -232,8 +279,21 @@ searchStr:
 	mov x21,x0
 	ldr x22, =headPtr
 	bl stringSearch
-	b inputLoop
+	b displayMenu
+	
 saveFile:
+	ldr	x0,=szPrompt5
+	bl	putstring
+	
+	ldr	x0,=strTemp
+	mov	x1,#MAX_BYTES
+	bl	getstring
+	
+	ldr x0,=headPtr
+	ldr x3,=strTemp
+	
+	bl saveToFile
+	b displayMenu
 	
 checkAorB:
 	ldr	x20,=szInput
@@ -255,3 +315,5 @@ quit:
 	mov x8,#93
 	svc	0
 	.end
+	
+	
