@@ -1,7 +1,6 @@
 //RASM4 menu driver
 
 //
-
 //
 .equ RW_RW___, 0660
 .equ AT_FDCWD, -100
@@ -12,12 +11,14 @@ szName:		.asciz	"Names: Austin Monroe & Jocelyne Gallardo"
 szProg:		.asciz	"Program: RASM4"
 szClass:	.asciz	"Class: CS3B"
 szDate:		.asciz	"Date: November 9, 2023"
-szConsump:	.asciz	"Data Structure Heap Memory Cosumption: "
+szConsump:	.asciz	"Data Structure Heap Memory Consumption: "
 szNodes:	.asciz	"Number of Nodes: "
 szMenu:		.asciz	"<1> View all strings\n\n<2> Add String\n\t<a> from Keyboard\n\t<b> from File\n\n<3> Delete String\n\n<4> Edit String\n\n<5> String Search\n\n<6> Save File\n\n<7> Quit\n\n" 
 szPrompt:	.asciz	"\nEnter your selection: "
 szPrompt1:	.asciz	"Enter a string: "
 szPrompt2:	.asciz	"Enter a line to delete: "
+szPrompt3:	.asciz	"Enter a line to edit: "
+szStringSearch: .asciz "Enter a string to search: "
 szInvalidMsg:	.asciz	"Invalid entry."
 szGoodbye:	.asciz	"Goodbye.\n"
 szInput:	.skip	21
@@ -28,6 +29,7 @@ headPtr:  .quad 0
 tailPtr:  .quad  0
 numNodes:	.quad 0
 consumption: .quad 0
+index:		.quad 0
 
 
 	.global _start
@@ -35,22 +37,22 @@ consumption: .quad 0
 _start:
 	ldr	x0,=szName	//x0 points to szName
 	bl	putstring	//prints string
-	ldr 	x0,=chLF	//x0 points to chLF
+	ldr x0,=chLF	//x0 points to chLF
 	bl	putch		//prints carriage return
 
 	ldr	x0,=szProg	//x0 points to szProg
 	bl	putstring	//prints string
-	ldr 	x0,=chLF	//x0 points to chLF
+	ldr x0,=chLF	//x0 points to chLF
 	bl	putch		//prints carriage return
 
 	ldr	x0,=szClass	//x0 points to szClass
 	bl	putstring	//prints string
-	ldr 	x0,=chLF	//x0 points to chLF
+	ldr x0,=chLF	//x0 points to chLF
 	bl	putch		//prints carriage return
 
 	ldr	x0,=szDate	//x0 points to szDate
 	bl	putstring	//prints string
-	ldr 	x0,=chLF	//x0 points to chLF
+	ldr x0,=chLF	//x0 points to chLF
 	bl	putch		//prints carriage return
 	ldr	x0,=chLF	//x0 points to chLF
 	bl	putch		//prints carriage return
@@ -59,8 +61,10 @@ displayMenu:
 	ldr	x0,=szConsump
 	bl	putstring
 	ldr	x0,=consumption
+	ldr	x0,[x0]
 	ldr	x1,=strTemp
 	bl	int64asc
+	ldr	x0,=strTemp
 	bl	putstring
 	ldr	x0,=chLF
 	bl	putch
@@ -68,8 +72,10 @@ displayMenu:
 	ldr	x0,=szNodes
 	bl	putstring
 	ldr	x0,=numNodes
+	ldr	x0,[x0]
 	ldr	x1,=strTemp
 	bl	int64asc
+	ldr	x0,=strTemp
 	bl	putstring
 	ldr	x0,=chLF
 	bl	putch
@@ -78,6 +84,28 @@ displayMenu:
 	bl	putstring
 	
 inputLoop:
+	ldr	x0,=szConsump
+	bl	putstring
+	ldr	x0,=consumption
+	ldr	x0,[x0]
+	ldr	x1,=strTemp
+	bl	int64asc
+	ldr	x0,=strTemp
+	bl	putstring
+	ldr	x0,=chLF
+	bl	putch
+
+	ldr	x0,=szNodes
+	bl	putstring
+	ldr	x0,=numNodes
+	ldr	x0,[x0]
+	ldr	x1,=strTemp
+	bl	int64asc
+	ldr	x0,=strTemp
+	bl	putstring
+	ldr	x0,=chLF
+	bl	putch
+	
 	ldr	x0,=szPrompt
 	bl	putstring
 	
@@ -162,17 +190,20 @@ addStrFromKeyboard:
    	ldr x1,=tailPtr
    	ldr x2,=newNode
 	ldr x3,=strTemp
-	ldr x4,=numNodes
-	ldr x5,=consumption
+	ldr x4,=consumption
+	ldr x5,=numNodes
 
 	bl	addFromKBD
 	
 	b inputLoop
 	
 addStringFromFile:
-    ldr x0, =headPtr
-    ldr x1, =tailPtr
-    ldr x2, =newNode 
+    ldr x0,=headPtr
+    ldr x1,=tailPtr
+    ldr x2,=newNode
+	ldr x5,=consumption
+	ldr x6,=numNodes
+
 	bl	addFromFile
 	
 	b inputLoop
@@ -182,19 +213,69 @@ deleteStr:
 	ldr	x0,=szPrompt2
 	bl	putstring
 	
-	ldr	x0,=strInput
+	ldr	x0,=index
 	mov	x1,#MAX_BYTES
 	bl	getstring
-		//prompt user for index?
-	//use index in function to delete String
-	//b inputLoop
+	
+	ldr x0,=index
+	bl ascint64
+	mov x1,x0
+	ldr x0,=index
+	str x1,[x0]
+	
+	ldr x0,=headPtr
+   	ldr x1,=tailPtr
+   	ldr x2,=newNode
+	ldr x3,=index
+	ldr x4,=consumption
+	ldr x5,=numNodes
+
+	
+	bl	deleteString
+	
+	b inputLoop
 
 editStr:
-	//
+	//ldr	x0,=szPrompt3
+	//bl	putstring
+	
+	//ldr	x0,=index
+	//mov	x1,#MAX_BYTES
+	//bl	getstring
+	
+	//ldr x0,=index
+	//bl ascint64
+	//mov x1,x0
+	//ldr x0,=index
+	//str x1,[x0] 
+	
+	//ldr x0,=headPtr
+   	//ldr x1,=tailPtr
+   	//ldr x2,=newNode
+	//ldr x3,=index
+	//ldr x4,=consumption
+	//ldr x5,=numNodes
+	
+	//bl editString
+	
+	//bl inputLoop
 
 searchStr:
-
+	ldr x0, =szStringSearch
+	bl putstring
+	ldr	x0,=strTemp
+	mov	x1,#MAX_BYTES
+	bl	getstring
+	ldr x0,=strTemp
+	mov x21,x0
+	ldr x22, =headPtr
+	bl stringSearch
+	b inputLoop
+	
 saveFile:
+	ldr x0,=headPtr
+	bl saveToFile
+	b inputLoop
 	
 checkAorB:
 	ldr	x20,=szInput
@@ -216,4 +297,5 @@ quit:
 	mov x8,#93
 	svc	0
 	.end
-
+	
+	
