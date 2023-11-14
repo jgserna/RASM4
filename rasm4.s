@@ -18,7 +18,8 @@ szPrompt:	.asciz	"\nEnter your selection: "
 szPrompt1:	.asciz	"Enter a string: "
 szPrompt2:	.asciz	"Enter a line to delete: "
 szPrompt3:	.asciz	"Enter a line to edit: "
-szPrompt4:	.asciz	"Enter a file name: "
+szPrompt4:	.asciz	"Enter a file name : "
+szPrompt5:	.asciz	"Enter a file name to save: "
 szStringSearch: .asciz "Enter a string to search: "
 szInvalidMsg:	.asciz	"INVALID ENTRY.\n"
 szGoodbye:	.asciz	"Goodbye.\n"
@@ -281,7 +282,16 @@ searchStr:
 	b displayMenu
 	
 saveFile:
+	ldr	x0,=szPrompt5
+	bl	putstring
+	
+	ldr	x0,=strTemp
+	mov	x1,#MAX_BYTES
+	bl	getstring
+	
 	ldr x0,=headPtr
+	ldr x3,=strTemp
+	
 	bl saveToFile
 	b displayMenu
 	
