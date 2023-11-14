@@ -12,11 +12,14 @@ iFD: .word 0
 	.global saveToFile
     .text
 saveToFile:
+
+
     mov x21,x0
     mov x0, #AT_FDCWD
     mov x8, #56
-    ldr x1, =szFile
-    mov x2, #W
+//    ldr x1, =szFile
+	mov x1,x3
+	mov x2, #W
     mov x3, #RW_RW___
     svc 0
 
